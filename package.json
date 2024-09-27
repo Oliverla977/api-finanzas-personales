@@ -1,0 +1,14 @@
+{
+  "name": "api-finanzas-personales",
+  "version": "1.0.0",
+  "description": "api en express js para gestor de finanzas personales basico.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Oliver Lopez",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
