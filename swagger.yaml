@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: Gestor de Finanzas
+  description: API para gestor de finanzas personales.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+
+paths:
+  /monedas:
+    get:
+      summary: Obtener todas las monedas
+      description: Devuelve una lista de todas las monedas disponibles.
+      responses:
+        '200':
+          description: Lista de monedas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    idMoneda:
+                      type: integer
+                      example: 1
+                    codigoISO:
+                      type: string
+                      example: USD
+                    simbolo:
+                      type: string
+                      example: $
+                    nombre:
+                      type: string
+                      example: Dólar Estadounidense

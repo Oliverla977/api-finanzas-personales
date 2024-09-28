@@ -2,19 +2,20 @@ const express = require('express')
 const app = express()
 const port = 3000
 const dotenv = require('dotenv');
-
+const swaggerUi = require('swagger-ui-express');
+const yaml = require('yamljs');
 const monedasRoutes = require('./routes/monedas');
 
 dotenv.config();
-// Middleware para parsear JSON
 app.use(express.json());
 
 // Ruta de monedas
 app.use('/monedas', monedasRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Hola Mundo');
-});
+
+// Cargar Swagger
+const swaggerDocument = yaml.load('./swagger.yaml');
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
