@@ -94,4 +94,4 @@ Asegúrate de configurar estas variables en un archivo `.env` en el directorio r
 
 4. Inicia el servidor de desarrollo:
     ```bash
-    npm run dev
+    node index.js
