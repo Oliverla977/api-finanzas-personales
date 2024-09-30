@@ -21,7 +21,9 @@ Actualmente, el proyecto está en desarrollo, por lo que las rutas de la API aú
 
 ## Estructura de la Base de Datos
 
-La base de datos relacional está diseñada en **MySQL** con un enfoque normalizado para garantizar la consistencia de los datos. El diagrama entidad-relación (ER) del proyecto se encuentra en la raíz del repositorio bajo el nombre `ER.svg`.
+La base de datos relacional está diseñada en **MySQL** con un enfoque normalizado para garantizar la consistencia de los datos. El diagrama entidad-relación (ER) del proyecto se encuentra en la raíz del repositorio.
+
+![ER](https://raw.githubusercontent.com/Oliverla977/api-finanzas-personales/c19e3e17b7d0c431d241fc09b0d0dc47024fb8d1/ER.svg "ER")
 
 A continuación se describe brevemente el modelo de base de datos:
 
