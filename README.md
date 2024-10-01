@@ -63,6 +63,9 @@ Para configurar la conexión con la base de datos, es necesario establecer las s
 - `DB_PASSWORD`: La contraseña del usuario para la base de datos.
 - `DB_NAME`: El nombre de la base de datos (por defecto: `finanzas_personales`).
 - `DB_PORT`: El puerto de conexión a la base de datos.
+- `LOCAL_SERVER_URL`: http://localhost:3000
+- `PRODUCTION_SERVER_URL`: URL
+- `NODE_ENV`: local || production
 
 Asegúrate de configurar estas variables en un archivo `.env` en el directorio raíz del proyecto.
 
@@ -91,6 +94,9 @@ Asegúrate de configurar estas variables en un archivo `.env` en el directorio r
     DB_PASSWORD=tu_contraseña
     DB_NAME=finanzas_personales
     DB_PORT=3306
+    LOCAL_SERVER_URL=http://localhost:3000
+    PRODUCTION_SERVER_URL=URL
+    NODE_ENV=local
 
 4. Inicia el servidor de desarrollo:
     ```bash
