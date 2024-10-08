@@ -1,6 +1,8 @@
 const connection = require('../config/db');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+
 
 // Configuración de bcrypt
 const SALT_ROUNDS = 10;
@@ -27,7 +29,14 @@ exports.validateUser = [
 
   // Validacion al iniciar sesion
   exports.validateLogin = [
-    
+    body('password')
+        .trim()
+        .notEmpty().withMessage('La contraseña es requerida'),
+    body('identificador')
+        .trim()
+        .notEmpty()
+        .withMessage('Debe proporcionar un email o nombre de usuario')
+        
   ]
 
 exports.crearUsuario = async (req, res) => {
@@ -96,11 +105,86 @@ exports.crearUsuario = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al crear el usuario',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'local' ? error.message : undefined
     });
   }
 };
 
 exports.login = async (req, res) => {
+    try{
+        //verificar si hay errores de validacion
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ 
+            success: false,
+            errors: errors.array() 
+          });
+        }
+        
+        const { identificador, password } = req.body;
 
+        // Buscar usuario por email o nombre de usuario
+        const [users] = await connection.query(
+            'SELECT * FROM usuarios WHERE correo = ? OR nombre_usuario = ? LIMIT 1',
+            [identificador, identificador]
+          );
+    
+        // Verificar si se encontró algún usuario
+        if (users.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: 'Credenciales inválidas'
+            });
+        }
+
+        // Obtener el primer usuario encontrado
+        const user = users[0];
+        //console.log(user);
+    
+        // Verificar contraseña
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({
+                success: false,
+                message: 'Credenciales inválidas'
+            });
+        }
+
+         // Generar JWT
+        const payload = {
+            user: {
+            id: user.idUsuario,
+            username: user.nombre_usuario,
+            email: user.correo,
+            moneda: user.moneda_id,
+            zona_horaria: user.zona_horaria
+            }
+        };
+    
+        const token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+    
+        // Responder con el token y datos básicos del usuario
+        res.json({
+            token,
+            user: {
+                id: user.idUsuario,
+                username: user.nombre_usuario,
+                email: user.correo,
+                moneda: user.moneda_id,
+                zona_horaria: user.zona_horaria
+            }
+        });
+
+    }catch (error) {
+        console.error('Error al iniciar sesion:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Error al iniciar sesion',
+          error: process.env.NODE_ENV === 'local' ? error.message : undefined
+        });
+      }
 }

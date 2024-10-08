@@ -6,6 +6,6 @@ const usuariosController = require('../controllers/usuariosController');
 router.post('/registro', usuariosController.validateUser, usuariosController.crearUsuario);
 
 //POST /usuarios/login inicio de sesion de usuarios
-router.post('/login', usuariosController.login);
+router.post('/login', usuariosController.validateLogin, usuariosController.login);
 
 module.exports = router;
