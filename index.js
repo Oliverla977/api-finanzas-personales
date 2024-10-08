@@ -6,12 +6,16 @@ const swaggerUi = require('swagger-ui-express');
 const yaml = require('yamljs');
 const fs = require('fs');
 const monedasRoutes = require('./routes/monedas');
+const usuariosRoutes = require('./routes/usuarios');
 
 dotenv.config();
 app.use(express.json());
 
 // Ruta de monedas
 app.use('/monedas', monedasRoutes);
+
+//Ruta de usuarios
+app.use('/usuarios', usuariosRoutes);
 
 
 // Cargar Swagger
