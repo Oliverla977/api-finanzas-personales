@@ -2,6 +2,7 @@ const connection = require('../config/db');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const Usuario = require('../models/usuarioModel');
 
 
 // Configuración de bcrypt
@@ -217,15 +218,20 @@ exports.verPerfil = async (req, res) => {
     try{
         const { id } = req.user.user;
 
-        const [user] = await connection.query(
-            'SELECT A.nombre_usuario AS username, A.correo, A.moneda_id, B.simbolo, A.zona_horaria, C.codigo FROM usuarios A INNER JOIN monedas B ON A.moneda_id = B.idMoneda INNER JOIN zonas_horarias C ON A.zona_horaria = C.idZonaHoraria WHERE idUsuario = ?',
-            [id]
-        );
+        const usuario = await Usuario.obtenerPorId(id, connection);
 
-        res.json({
-            success: true,
-            data: user[0]
-        });
+        if (!usuario) {
+          return res.status(404).json({
+              success: false,
+              message: 'Usuario no encontrado'
+          });
+      }
+
+      res.json({
+          success: true,
+          data: usuario
+      });
+
     }catch (error) {
         console.error('Error al obtener perfil:', error);
         res.status(500).json({
