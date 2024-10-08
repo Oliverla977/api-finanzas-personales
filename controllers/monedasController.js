@@ -1,15 +1,12 @@
 const connection = require('../config/db');
 
-const getAllMonedas = (req, res) => {
-  const query = 'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas';
-  connection.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
-};
+exports.getAllMonedas = async (req, res) => {
+  try{
+    const query = 'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas';
+    const [monedas] = await connection.query(query);
+    return res.json(monedas);
 
-module.exports = {
-  getAllMonedas
+  }catch(err){
+    return res.status(500).json({ error: err.message });
+  }
 };

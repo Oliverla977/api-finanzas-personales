@@ -169,14 +169,14 @@ exports.login = async (req, res) => {
     
         // Responder con el token y datos básicos del usuario
         res.json({
-            token,
-            user: {
+            token
+            /*user: {
                 id: user.idUsuario,
                 username: user.nombre_usuario,
                 email: user.correo,
                 moneda: user.moneda_id,
                 zona_horaria: user.zona_horaria
-            }
+            }*/
         });
 
     }catch (error) {
@@ -187,4 +187,51 @@ exports.login = async (req, res) => {
           error: process.env.NODE_ENV === 'local' ? error.message : undefined
         });
       }
-}
+};
+
+exports.authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token == null) {
+        return res.status(401).json({
+            success: false,
+            message: 'Token no proporcionado'
+        });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({
+                success: false,
+                message: 'Token inválido'
+            });
+        }
+
+        req.user = user;
+        next();
+    });
+};
+
+exports.verPerfil = async (req, res) => {
+    try{
+        const { id } = req.user.user;
+
+        const [user] = await connection.query(
+            'SELECT A.nombre_usuario AS username, A.correo, A.moneda_id, B.simbolo, A.zona_horaria, C.codigo FROM usuarios A INNER JOIN monedas B ON A.moneda_id = B.idMoneda INNER JOIN zonas_horarias C ON A.zona_horaria = C.idZonaHoraria WHERE idUsuario = ?',
+            [id]
+        );
+
+        res.json({
+            success: true,
+            data: user[0]
+        });
+    }catch (error) {
+        console.error('Error al obtener perfil:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Error al obtener perfil',
+          error: process.env.NODE_ENV === 'local' ? error.message : undefined
+        });
+      }
+};

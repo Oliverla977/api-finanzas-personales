@@ -8,4 +8,7 @@ router.post('/registro', usuariosController.validateUser, usuariosController.cre
 //POST /usuarios/login inicio de sesion de usuarios
 router.post('/login', usuariosController.validateLogin, usuariosController.login);
 
+//GET /usuarios/perfil obtencion de datos del usuario
+router.get('/perfil', usuariosController.authenticateToken, usuariosController.verPerfil);
+
 module.exports = router;
