@@ -2,11 +2,14 @@ const connection = require('../config/db');
 
 exports.getAllMonedas = async (req, res) => {
   try {
-    const query = 'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas';
-    const [monedas] = await connection.query(query);
+    const [monedas] = await connection.query(
+      'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas'
+    );
     return res.json(monedas);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ 
+      error: err.message 
+    });
   }
 };
 
@@ -20,8 +23,10 @@ exports.getMonedaById = async (req, res) => {
     }
 
     // Consultar la moneda por id
-    const query = 'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas WHERE idMoneda = ?';
-    const [moneda] = await connection.query(query, [id]);
+    const [moneda] = await connection.query(
+      'SELECT idMoneda AS id, codigoISO, simbolo, nombre FROM monedas WHERE idMoneda = ?', 
+      [id]
+    );
 
     // Verificar si la moneda existe
     if (moneda.length === 0) {
@@ -30,6 +35,8 @@ exports.getMonedaById = async (req, res) => {
 
     return res.json(moneda[0]);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({
+      error: err.message 
+    });
   }
 };

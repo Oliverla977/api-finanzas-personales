@@ -25,7 +25,7 @@ exports.validateUser = [
         .trim()
         .toInt()
         .notEmpty().withMessage('La zona horaria es requerida')
-      .withMessage('Zona horaria inválida')
+        .withMessage('Zona horaria inválida')
   ];
 
   // Validacion al iniciar sesion
@@ -48,18 +48,25 @@ exports.validateUser = [
       .withMessage('El nombre es requerido'),
     body('correo')
       .trim()
-      .notEmpty().withMessage('El correo es requerido')
-      .isEmail().withMessage('Debe ser un correo válido').normalizeEmail(),
+      .notEmpty()
+      .withMessage('El correo es requerido')
+      .isEmail()
+      .withMessage('Debe ser un correo válido')
+      .normalizeEmail(),
     body('moneda')
       .trim()
       .toInt()
-      .notEmpty().withMessage('La moneda es requerida')
-      .isInt().withMessage('Moneda inválida'),
+      .notEmpty()
+      .withMessage('La moneda es requerida')
+      .isInt()
+      .withMessage('Moneda inválida'),
     body('zona_horaria')
       .trim()
       .toInt()
-      .notEmpty().withMessage('La zona horaria es requerida')
-      .isInt().withMessage('Zona horaria inválida')
+      .notEmpty()
+      .withMessage('La zona horaria es requerida')
+      .isInt()
+      .withMessage('Zona horaria inválida')
   ];
 
 exports.crearUsuario = async (req, res) => {
@@ -160,9 +167,8 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Obtener el primer usuario encontrado
+        // Obtener el usuario encontrado
         const user = users[0];
-        //console.log(user);
     
         // Verificar contraseña
         const isValidPassword = await bcrypt.compare(password, user.password);
@@ -176,11 +182,11 @@ exports.login = async (req, res) => {
          // Generar JWT
         const payload = {
             user: {
-            id: user.idUsuario,
-            username: user.nombre_usuario,
-            email: user.correo,
-            moneda: user.moneda_id,
-            zona_horaria: user.zona_horaria
+                id: user.idUsuario,
+                username: user.nombre_usuario,
+                email: user.correo,
+                moneda: user.moneda_id,
+                zona_horaria: user.zona_horaria
             }
         };
     
@@ -239,7 +245,6 @@ exports.authenticateToken = (req, res, next) => {
 exports.verPerfil = async (req, res) => {
     try{
         const { id } = req.user.user;
-
         const usuario = await Usuario.obtenerPorId(id, connection);
 
         if (!usuario) {
