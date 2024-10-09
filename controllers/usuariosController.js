@@ -10,21 +10,35 @@ const SALT_ROUNDS = 10;
 
 // Validacion al crear usuario
 exports.validateUser = [
-    body('nombre').trim().notEmpty().withMessage('El nombre es requerido'),
+    body('nombre')
+      .trim()
+      .notEmpty()
+      .withMessage('El nombre es requerido')
+      .isLength({ min: 3 })
+      .withMessage('El nombre debe tener al menos 3 caracteres')
+      .matches(/^[A-Za-z0-9]+$/)
+      .withMessage('El nombre solo puede contener letras y números'),
     body('correo')
       .trim()
-      .notEmpty().withMessage('El correo es requerido')
-      .isEmail().withMessage('Debe ser un correo válido')
+      .notEmpty()
+      .withMessage('El correo es requerido')
+      .matches(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+      .withMessage('Formato de correo inválido')
+      .isEmail()
+      .withMessage('Debe ser un correo válido')
       .normalizeEmail(),
     body('password')
       .trim()
-      .notEmpty().withMessage('La contraseña es requerida')
-      .isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+      .notEmpty()
+      .withMessage('La contraseña es requerida')
+      .isLength({ min: 6 })
+      .withMessage('La contraseña debe tener al menos 6 caracteres'),
     body('moneda').trim().notEmpty().withMessage('La moneda es requerida'),
     body('zona_horaria')
         .trim()
         .toInt()
-        .notEmpty().withMessage('La zona horaria es requerida')
+        .notEmpty()
+        .withMessage('La zona horaria es requerida')
         .withMessage('Zona horaria inválida')
   ];
 
@@ -45,14 +59,26 @@ exports.validateUser = [
     body('nombre')
       .trim()
       .notEmpty()
-      .withMessage('El nombre es requerido'),
+      .withMessage('El nombre es requerido')
+      .isLength({ min: 3 })
+      .withMessage('El nombre debe tener al menos 3 caracteres')
+      .matches(/^[A-Za-z0-9]+$/)
+      .withMessage('El nombre solo puede contener letras y números'),
     body('correo')
       .trim()
       .notEmpty()
       .withMessage('El correo es requerido')
+      .matches(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+      .withMessage('Formato de correo inválido')
       .isEmail()
       .withMessage('Debe ser un correo válido')
       .normalizeEmail(),
+    body('password')
+      .trim()
+      .notEmpty()
+      .withMessage('La contraseña es requerida')
+      .isLength({ min: 6 })
+      .withMessage('La contraseña debe tener al menos 6 caracteres'),
     body('moneda')
       .trim()
       .toInt()
@@ -281,7 +307,7 @@ exports.actualizarPerfil = async (req, res) => {
     }
 
     const { id } = req.user.user; //id obtenida del token
-    const { nombre, correo, moneda, zona_horaria } = req.body;
+    const { nombre, correo, password, moneda, zona_horaria } = req.body;
 
     // Verificar si el usuario existe
     const [existingUsers] = await connection.query(
@@ -309,12 +335,20 @@ exports.actualizarPerfil = async (req, res) => {
       });
     }
 
+    // Encriptar la contraseña
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
     // Actualizar el usuario
     await connection.query(
       `UPDATE usuarios 
-       SET nombre_usuario = ?, correo = ?, moneda_id = ?, zona_horaria = ? 
+       SET
+        nombre_usuario = ?,
+        correo = ?,
+        password = ?,
+        moneda_id = ?,
+        zona_horaria = ? 
        WHERE idUsuario = ?`,
-      [nombre, correo, moneda, zona_horaria, id]
+      [nombre, correo, hashedPassword, moneda, zona_horaria, id]
     );
 
     res.json({

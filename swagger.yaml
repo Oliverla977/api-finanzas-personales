@@ -67,6 +67,7 @@ components:
         nombre:
           type: string
           example: "username"
+          minLength: 3
         correo:
           type: string
           format: email
@@ -74,6 +75,7 @@ components:
         password:
           type: string
           example: "password"
+          minLength: 6
         moneda:
           type: integer
           example: 1
@@ -156,9 +158,14 @@ components:
         nombre:
           type: string
           example: "username"
+          minLength: 3
         correo:
           type: string
           example: "user@domain.com"
+        password:
+          type: string
+          example: "password"
+          minLength: 6
         moneda:
           type: integer
           example: 1
