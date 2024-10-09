@@ -7,9 +7,302 @@ servers:
   - url: http://localhost:3000
     description: Servidor local
 
+tags:
+  - name: Usuarios
+    description: Operaciones relacionadas con usuarios, autenticación y perfil
+  - name: Monedas
+    description: Gestión de monedas disponibles en el sistema
+  - name: Zonas Horarias
+    description: Gestión de zonas horarias disponibles
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    Moneda:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        codigoISO:
+          type: string
+          example: "USD"
+        simbolo:
+          type: string
+          example: "$"
+        nombre:
+          type: string
+          example: "Dólar Estadounidense"
+    
+    Zona:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        codigo:
+          type: string
+          example: "UTC"
+        nombre:
+          type: string
+          example: "Tiempo Universal Coordinado"
+        offset:
+          type: string
+          example: "UTC+00:00"
+
+    RegistroRequest:
+      type: object
+      required:
+        - nombre
+        - correo
+        - password
+        - moneda
+        - zona_horaria
+      properties:
+        nombre:
+          type: string
+          example: "username"
+        correo:
+          type: string
+          format: email
+          example: "user@domain.com"
+        password:
+          type: string
+          example: "password"
+        moneda:
+          type: integer
+          example: 1
+        zona_horaria:
+          type: integer
+          example: 1
+
+    RegistroResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            nombre:
+              type: string
+              example: "username"
+            correo:
+              type: string
+              example: "user@domain.com"
+            moneda:
+              type: integer
+              example: 1
+            zona_horaria:
+              type: integer
+              example: 1
+
+    LoginRequest:
+      type: object
+      required:
+        - identificador
+        - password
+      properties:
+        identificador:
+          type: string
+          example: "username"
+          description: "Puede ser el nombre de usuario o correo electrónico"
+        password:
+          type: string
+          example: "password"
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    PerfilResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 6
+            username:
+              type: string
+              example: "username"
+            correo:
+              type: string
+              example: "user@domain.com"
+            moneda:
+              $ref: '#/components/schemas/Moneda'
+            zonaHoraria:
+              $ref: '#/components/schemas/Zona'
+
+    ActualizarPerfilRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "username"
+        correo:
+          type: string
+          example: "user@domain.com"
+        moneda:
+          type: integer
+          example: 1
+        zona_horaria:
+          type: integer
+          example: 1
+
+    ActualizarPerfilResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Perfil actualizado exitosamente"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Mensaje de error"
+
 paths:
+  /usuarios/registro:
+    post:
+      tags:
+        - Usuarios
+      summary: Registrar un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistroResponse'
+        '400':
+          description: Error en el registro
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /usuarios/login:
+    post:
+      tags:
+        - Usuarios
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /usuarios/perfil:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener perfil del usuario
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerfilResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      tags:
+        - Usuarios
+      summary: Actualizar perfil del usuario
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizarPerfilRequest'
+      responses:
+        '200':
+          description: Perfil actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActualizarPerfilResponse'
+        '400':
+          description: Error al actualizar el perfil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                usuarioExistente:
+                  value:
+                    success: false
+                    message: "El nombre de usuario ya existe"
+                correoExistente:
+                  value:
+                    success: false
+                    message: "El correo ya está registrado"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /monedas:
     get:
+      tags:
+        - Monedas
       summary: Obtener todas las monedas
       description: Devuelve una lista de todas las monedas disponibles.
       responses:
@@ -20,17 +313,63 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      example: 1
-                    codigoISO:
-                      type: string
-                      example: USD
-                    simbolo:
-                      type: string
-                      example: $
-                    nombre:
-                      type: string
-                      example: Dólar Estadounidense
+                  $ref: '#/components/schemas/Moneda'
+  
+  /monedas/{id}:
+    get:
+      tags:
+        - Monedas
+      summary: Obtener una moneda específica
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID de la moneda
+      responses:
+        '200':
+          description: Moneda encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Moneda'
+        '404':
+          description: Moneda no encontrada
+
+  /zonas:
+    get:
+      tags:
+        - Zonas Horarias
+      summary: Obtener todas las zonas horarias
+      responses:
+        '200':
+          description: Lista de zonas horarias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Zona'
+
+  /zonas/{id}:
+    get:
+      tags:
+        - Zonas Horarias
+      summary: Obtener una zona horaria específica
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID de la zona horaria
+      responses:
+        '200':
+          description: Zona horaria encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Zona'
+        '404':
+          description: Zona horaria no encontrada
