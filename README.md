@@ -25,11 +25,12 @@ Actualmente, el proyecto está en desarrollo, por lo que las rutas de la API aú
 
 La base de datos relacional está diseñada en **MySQL** con un enfoque normalizado para garantizar la consistencia de los datos. El diagrama entidad-relación (ER) del proyecto se encuentra en la raíz del repositorio.
 
-![ER](https://raw.githubusercontent.com/Oliverla977/api-finanzas-personales/refs/heads/desarrollo/ER2.svg "ER")
+![ER](https://raw.githubusercontent.com/Oliverla977/api-finanzas-personales/refs/heads/desarrollo/ER.svg "ER")
 
 A continuación se describe brevemente el modelo de base de datos:
 
 - **monedas**: Define las monedas disponibles (código ISO, símbolo, y nombre).
+- **zonas_horarias**: Define las zonas horarias disponibles.
 - **usuarios**: Almacena los datos de los usuarios (nombre, correo, moneda preferida, etc.).
 - **presupuestos**: Cada presupuesto mensual del usuario, con su respectiva moneda.
 - **categorías**: Categorías de ingresos y gastos personalizadas por el usuario.
