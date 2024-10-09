@@ -38,7 +38,29 @@ exports.validateUser = [
         .notEmpty()
         .withMessage('Debe proporcionar un email o nombre de usuario')
         
-  ]
+  ];
+
+  // Validacion al actualizar perfil
+  exports.validateUpdate = [
+    body('nombre')
+      .trim()
+      .notEmpty()
+      .withMessage('El nombre es requerido'),
+    body('correo')
+      .trim()
+      .notEmpty().withMessage('El correo es requerido')
+      .isEmail().withMessage('Debe ser un correo válido').normalizeEmail(),
+    body('moneda')
+      .trim()
+      .toInt()
+      .notEmpty().withMessage('La moneda es requerida')
+      .isInt().withMessage('Moneda inválida'),
+    body('zona_horaria')
+      .trim()
+      .toInt()
+      .notEmpty().withMessage('La zona horaria es requerida')
+      .isInt().withMessage('Zona horaria inválida')
+  ];
 
 exports.crearUsuario = async (req, res) => {
   try {
@@ -240,4 +262,66 @@ exports.verPerfil = async (req, res) => {
           error: process.env.NODE_ENV === 'local' ? error.message : undefined
         });
       }
+};
+
+exports.actualizarPerfil = async (req, res) => {
+  try{
+    // Verificar si hay errores de validación
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        success: false,
+        errors: errors.array() 
+      });
+    }
+
+    const { id } = req.user.user; //id obtenida del token
+    const { nombre, correo, moneda, zona_horaria } = req.body;
+
+    // Verificar si el usuario existe
+    const [existingUsers] = await connection.query(
+      'SELECT idUsuario FROM usuarios WHERE nombre_usuario = ?',
+      [nombre]
+    );
+
+    if (existingUsers.length > 0 && existingUsers[0].idUsuario !== id) {
+      return res.status(400).json({
+        success: false,
+        message: 'El nombre de usuario ya existe'
+      });
+    }
+
+    // Verificar si el correo ya existe
+    const [existingCorreo] = await connection.query(
+      'SELECT idUsuario FROM usuarios WHERE correo = ?',
+      [correo]
+    );
+
+    if (existingCorreo.length > 0 && existingCorreo[0].idUsuario !== id) {
+      return res.status(400).json({
+        success: false,
+        message: 'El correo ya está registrado'
+      });
+    }
+
+    // Actualizar el usuario
+    await connection.query(
+      `UPDATE usuarios 
+       SET nombre_usuario = ?, correo = ?, moneda_id = ?, zona_horaria = ? 
+       WHERE idUsuario = ?`,
+      [nombre, correo, moneda, zona_horaria, id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado exitosamente'
+    });
+  }catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al actualizar perfil',
+        error: process.env.NODE_ENV === 'local' ? error.message : undefined
+      });
+    }
 };
