@@ -166,6 +166,7 @@ components:
           type: string
           example: "password"
           minLength: 6
+          optional: true
         moneda:
           type: integer
           example: 1

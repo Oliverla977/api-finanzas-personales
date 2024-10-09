@@ -74,6 +74,7 @@ exports.validateUser = [
       .withMessage('Debe ser un correo válido')
       .normalizeEmail(),
     body('password')
+      .optional()
       .trim()
       .notEmpty()
       .withMessage('La contraseña es requerida')
@@ -335,21 +336,29 @@ exports.actualizarPerfil = async (req, res) => {
       });
     }
 
-    // Encriptar la contraseña
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-    // Actualizar el usuario
-    await connection.query(
-      `UPDATE usuarios 
-       SET
+    // Preparar la consulta base
+    let querySQL = `
+      UPDATE usuarios 
+      SET
         nombre_usuario = ?,
         correo = ?,
-        password = ?,
         moneda_id = ?,
-        zona_horaria = ? 
-       WHERE idUsuario = ?`,
-      [nombre, correo, hashedPassword, moneda, zona_horaria, id]
-    );
+        zona_horaria = ?
+    `;
+    let queryParams = [nombre, correo, moneda, zona_horaria];
+
+    // Si se proporcionó una nueva contraseña, añadirla a la actualización
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      querySQL += `, password = ?`;
+      queryParams.push(hashedPassword);
+    }
+
+    querySQL += ` WHERE idUsuario = ?`;
+    queryParams.push(id);
+
+    // Ejecutar la actualización
+    await connection.query(querySQL, queryParams);
 
     res.json({
       success: true,
