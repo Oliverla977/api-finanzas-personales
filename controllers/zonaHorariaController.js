@@ -1,5 +1,5 @@
 const connection = require('../config/db');
-const { body, validationResult, param } = require('express-validator');
+const { validationResult, param } = require('express-validator');
 
 exports.validateId = [
     param('id')
