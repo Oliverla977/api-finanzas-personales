@@ -8,6 +8,7 @@ const fs = require('fs');
 const monedasRoutes = require('./routes/monedas');
 const usuariosRoutes = require('./routes/usuarios');
 const zonasRoutes = require('./routes/zonasHorarias');
+const categoriasRoutes = require('./routes/categorias');
 
 dotenv.config();
 app.use(express.json());
@@ -20,6 +21,9 @@ app.use('/usuarios', usuariosRoutes);
 
 // Ruta para obtener las zonas horarias
 app.use('/zonas', zonasRoutes);
+
+// Ruta para las categorías
+app.use('/categorias', categoriasRoutes);
 
 
 // Cargar Swagger
